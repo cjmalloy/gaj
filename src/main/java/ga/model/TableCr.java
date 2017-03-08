@@ -10,11 +10,19 @@ import java.util.List;
 public class TableCr implements Chromosome {
   public List<List<TableGuest>> tables = new ArrayList<>();
 
-  private final List<TableGuest> totalGuests;
+  private List<TableGuest> totalGuests;
   private int tableSize;
 
   public TableCr(List<TableGuest> totalGuests) {
     this.totalGuests = totalGuests;
+  }
+
+  public TableCr(TableCr c) {
+    this.totalGuests = c.totalGuests;
+    this.tableSize = c.tableSize;
+    for (List<TableGuest> table : c.tables) {
+      tables.add(new ArrayList<>(table));
+    }
   }
 
   public void initRandom(int tables) {
@@ -36,7 +44,7 @@ public class TableCr implements Chromosome {
     for (List<TableGuest> t : tables) {
       sum += TableGuest.variance(t);
     }
-    return sum / tables.size();
+    return -sum / tables.size();
   }
 
   @Override
@@ -66,32 +74,55 @@ public class TableCr implements Chromosome {
     if (tables.size() != other.tables.size()) throw new RuntimeException("Assumes equal table sizes.");
 
     int size = tables.size() / 2;
-    ArrayList<List<TableGuest>> left = new ArrayList<>(other.tables.subList(0, size));
-    ArrayList<List<TableGuest>> right = new ArrayList<>(tables.subList(size, tables.size()));
+    TableCr child = new TableCr(this);
 
-    // TODO: avoid invalid children
-//    List<TableGuest> duplicates = flatten(other.tables.subList(size, tables.size()));
-//    for (int i = 0; i < tables.size(); i++) {
-//      for (int j = 0; j < tableSize; j++) {
-//        TableGuest g = tables.get(i).get(j);
-//        if (duplicates.contains(g)) {
-//
-//        }
-//      }
-//    }
-
-    TableCr child = new TableCr(totalGuests);
-    child.tables = left;
-    left.addAll(right);
+    for (int i = 0; i < tables.size(); i++) {
+      List<TableGuest> t1 = child.tables.get(i);
+      List<TableGuest> t2 = other.tables.get(i);
+      List<TableGuest> move = t2.subList(tableSize/2, tableSize);
+      moveToTable(t1, move);
+    }
     return child;
   }
 
-  private List<TableGuest> flatten(List<List<TableGuest>> lists) {
-    ArrayList<TableGuest> results = new ArrayList<>();
-    for (List<TableGuest> t : lists) {
-      results.addAll(t);
+  private void moveToTable(List<TableGuest> toTable, List<TableGuest> move) {
+    List<TableGuest> missing = new ArrayList<>();
+    for (TableGuest g : move) {
+      if (!toTable.contains(g)) {
+        missing.add(g);
+      }
     }
-    return results;
+    List<TableGuest> remove = removeRandom(toTable, missing.size(), missing);
+    for (int i = 0; i < remove.size(); i++) {
+      swap(missing.get(i), remove.get(i));
+    }
+  }
+
+  private void swap(TableGuest a, TableGuest b) {
+    List<TableGuest> t1 = findTable(a);
+    List<TableGuest> t2 = findTable(b);
+    t1.remove(a);
+    t1.add(b);
+    t2.remove(b);
+    t2.add(a);
+  }
+
+  private List<TableGuest> findTable(TableGuest a) {
+    for (List<TableGuest> table : tables) {
+      if (table.contains(a)) return table;
+    }
+    return null;
+  }
+
+  private List<TableGuest> removeRandom(List<TableGuest> table, int size, List<TableGuest> excluded) {
+    List<TableGuest> remove = new ArrayList<>();
+    for (int i = 0; i < size; i++) {
+      TableGuest g;
+      do {
+        g = table.get((int) (Math.random() * table.size()));
+      } while (excluded.contains(g) || remove.contains(g));
+    }
+    return remove;
   }
 
   private boolean totalPresent() {
