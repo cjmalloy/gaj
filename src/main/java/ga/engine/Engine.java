@@ -45,7 +45,7 @@ public class Engine<T extends Chromosome> {
       System.out.println("Generation: " + i);
       System.out.println("Top fitness: " + chromosomes.get(0).fitness());
       chromosomes.subList(keep, size).clear();
-      List<T> best = new ArrayList<>(chromosomes.subList(0, keep));
+      List<T> best = new ArrayList<>(chromosomes);
       while (chromosomes.size() < size) {
         Chromosome c = generateOffspring(best);
         if (chromosomes.size() - keep < mutate) {
