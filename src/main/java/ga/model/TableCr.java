@@ -2,6 +2,7 @@ package ga.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -32,7 +33,9 @@ public class TableCr implements Chromosome {
     tableSize = totalGuests.size() / tables;
     if (tableSize != Math.floor(tableSize)) throw new RuntimeException("Table size not integer.");
     for (int i = 0; i < tables; i++) {
-      this.tables.add(new ArrayList<>(guests.subList(tableSize * i, tableSize * (i + 1))));
+      ArrayList<TableGuest> t = new ArrayList<>(guests.subList(tableSize * i, tableSize * (i + 1)));
+      t.sort(Comparator.comparingInt(g -> g.id));
+      this.tables.add(t);
     }
   }
 
@@ -83,6 +86,37 @@ public class TableCr implements Chromosome {
       moveToTable(t1, move);
     }
     return child;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof TableCr)) return false;
+    TableCr other = (TableCr) o;
+
+    for (List<TableGuest> table : tables) {
+      if (!other.containsTable(table)) return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int n = 0;
+    for (List<TableGuest> table : tables) {
+      for (TableGuest g : table) {
+        n += g.id;
+      }
+      n *= 10;
+    }
+    return n;
+  }
+
+  public boolean containsTable(List<TableGuest> search) {
+    for (List<TableGuest> table : tables) {
+      // Requires sorted tables
+      if (table.equals(search)) return true;
+    }
+    return false;
   }
 
   private void moveToTable(List<TableGuest> toTable, List<TableGuest> move) {

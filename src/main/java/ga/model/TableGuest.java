@@ -7,6 +7,8 @@ import java.util.List;
  */
 public class TableGuest {
 
+  public final int id;
+
   /**
    * -1 = liberal, 1 = conservative, 0 = don't care
    */
@@ -20,6 +22,10 @@ public class TableGuest {
     CHICKEN,
     STEAK,
     FISH;
+  }
+
+  public TableGuest(int id) {
+    this.id = id;
   }
 
   public void initRandom() {

@@ -18,7 +18,7 @@ public class GaTest {
   public static void main(String[] args) {
     List<TableGuest> totalGuests = new ArrayList<>();
     for (int i = 0; i < guests; i++) {
-      TableGuest g = new TableGuest();
+      TableGuest g = new TableGuest(i);
       g.initRandom();
       totalGuests.add(g);
     }

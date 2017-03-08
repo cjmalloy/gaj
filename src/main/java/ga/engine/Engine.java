@@ -6,6 +6,7 @@ import ga.model.TableCr;
 import javax.print.DocPrintJob;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by chris on 06/03/17.
@@ -15,7 +16,7 @@ public class Engine<T extends Chromosome> {
   public double keepRatio = 0.5;
   public double mutateRatio = 0.1;
 
-  private final List<T> chromosomes;
+  private List<T> chromosomes;
   private final int size;
   private int generations;
   private int threshold;
@@ -44,7 +45,7 @@ public class Engine<T extends Chromosome> {
       sort();
       System.out.println("Generation: " + i);
       System.out.println("Top fitness: " + chromosomes.get(0).fitness());
-      chromosomes.subList(keep, size).clear();
+      chromosomes.subList(keep, chromosomes.size()).clear();
       List<T> best = new ArrayList<>(chromosomes);
       while (chromosomes.size() < size) {
         Chromosome c = generateOffspring(best);
@@ -57,7 +58,7 @@ public class Engine<T extends Chromosome> {
   }
 
   private void sort() {
-    chromosomes.sort((o1, o2) -> toInt(o2.fitness() - o1.fitness()));
+    chromosomes = chromosomes.stream().sorted((o1, o2) -> toInt(o2.fitness() - o1.fitness())).distinct().collect(Collectors.toList());
   }
 
   private T generateOffspring(List<T> best) {
