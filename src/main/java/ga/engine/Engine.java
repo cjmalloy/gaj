@@ -9,11 +9,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Created by chris on 06/03/17.
+ * Genetic algorithms solver.
  */
 public class Engine<T extends Chromosome> {
 
+  /**
+   * Percent of chromosomes to keep each generation.
+   */
   public double keepRatio = 0.5;
+
+  /**
+   * Percent of chromosomes to mutate each generations.
+   */
   public double mutateRatio = 0.1;
 
   private List<T> chromosomes;
@@ -58,7 +65,10 @@ public class Engine<T extends Chromosome> {
   }
 
   private void sort() {
-    chromosomes = chromosomes.stream().sorted((o1, o2) -> toInt(o2.fitness() - o1.fitness())).distinct().collect(Collectors.toList());
+    chromosomes = chromosomes.stream()
+        .sorted((o1, o2) -> toInt(o2.fitness() - o1.fitness()))
+        .distinct()
+        .collect(Collectors.toList());
   }
 
   private T generateOffspring(List<T> best) {

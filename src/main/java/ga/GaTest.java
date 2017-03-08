@@ -8,14 +8,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by chris on 06/03/17.
+ * Test driver for solving a table seating problem.
  */
 public class GaTest {
 
+  /**
+   * Number of chromosomes.
+   */
   static int population = 400;
+
+  /**
+   * Number of guests in seating plan.
+   */
   static int guests = 100;
 
+  /**
+   * Number of tables in seating plan.
+   */
+  static int tables = 10;
+
+  /**
+   * Number of generation in this test.
+   */
+  static int generations = 1000;
+
   public static void main(String[] args) {
+    // Init random guest list
     List<TableGuest> totalGuests = new ArrayList<>();
     for (int i = 0; i < guests; i++) {
       TableGuest g = new TableGuest(i);
@@ -25,11 +43,11 @@ public class GaTest {
     List<TableCr> initialSet = new ArrayList<>();
     for (int i = 0; i < population; i++) {
       TableCr cr = new TableCr(totalGuests);
-      cr.initRandom(10);
+      cr.initRandom(tables);
       initialSet.add(cr);
     }
     Engine<TableCr> engine = new Engine<>(initialSet);
-    engine.run(1000);
+    engine.run(generations);
     engine.getBest().print();
   }
 }

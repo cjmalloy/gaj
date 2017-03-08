@@ -3,7 +3,7 @@ package ga.model;
 import java.util.List;
 
 /**
- * Created by chris on 06/03/17.
+ * Represents a guest.
  */
 public class TableGuest {
 
@@ -21,7 +21,7 @@ public class TableGuest {
   public enum FoodChoice {
     CHICKEN,
     STEAK,
-    FISH;
+    FISH
   }
 
   public TableGuest(int id) {

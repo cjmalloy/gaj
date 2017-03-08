@@ -6,18 +6,34 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Created by chris on 06/03/17.
+ * Chromosome for solving a table seating problem.
  */
 public class TableCr implements Chromosome {
+
+  /**
+   * Data representation for this chromosome. Each chromosome represents a complete
+   * seating solution.
+   */
   public List<List<TableGuest>> tables = new ArrayList<>();
 
+  /**
+   * List of all guests. Each guest should be seated exactly once.
+   */
   private List<TableGuest> totalGuests;
+
+  /**
+   * The number of guests per table. Calculated by dividing the number of guests
+   * by the number of tables.
+   */
   private int tableSize;
 
   public TableCr(List<TableGuest> totalGuests) {
     this.totalGuests = totalGuests;
   }
 
+  /**
+   * Copy constructor.
+   */
   public TableCr(TableCr c) {
     this.totalGuests = c.totalGuests;
     this.tableSize = c.tableSize;
@@ -39,6 +55,9 @@ public class TableCr implements Chromosome {
     }
   }
 
+  /**
+   * @inheritDoc
+   */
   @Override
   public double fitness() {
     if (!totalPresent()) return 0;
@@ -50,15 +69,17 @@ public class TableCr implements Chromosome {
     return -sum / tables.size();
   }
 
+  /**
+   * @inheritDoc
+   */
   @Override
   public TableCr mutate() {
-    TableCr child = new TableCr(totalGuests);
-    child.tables = new ArrayList<>(tables);
+    TableCr child = new TableCr(this);
 
-    List<TableGuest> t1 = tables.get((int) (Math.random() * tables.size()));
+    List<TableGuest> t1 = child.tables.get((int) (Math.random() * tables.size()));
     List<TableGuest> t2 = null;
     do {
-      t2 = tables.get((int) (Math.random() * tables.size()));
+      t2 = child.tables.get((int) (Math.random() * tables.size()));
     } while (t1 == t2);
 
     TableGuest g1 = t1.get((int) (Math.random() * t1.size()));
@@ -70,12 +91,16 @@ public class TableCr implements Chromosome {
     return child;
   }
 
+  /**
+   * @inheritDoc
+   */
   @Override
   public TableCr cross(Chromosome o) {
     if (!(o instanceof TableCr)) throw new RuntimeException("Type mismatch");
     TableCr other = (TableCr) o;
     if (tables.size() != other.tables.size()) throw new RuntimeException("Assumes equal table sizes.");
 
+    // Take half a table from each chromosome
     int size = tables.size() / 2;
     TableCr child = new TableCr(this);
 
@@ -111,6 +136,13 @@ public class TableCr implements Chromosome {
     return n;
   }
 
+  /**
+   * Check if this chromosome contains a table.
+   * Assumes the tables are sorted.
+   *
+   * @param search the table to search for
+   * @return true if the table is present
+   */
   public boolean containsTable(List<TableGuest> search) {
     for (List<TableGuest> table : tables) {
       // Requires sorted tables
@@ -119,6 +151,12 @@ public class TableCr implements Chromosome {
     return false;
   }
 
+  /**
+   * Move guests to a table by re-arranging so no duplicates are made.
+   *
+   * @param toTable the table to move to
+   * @param move the guests to move
+   */
   private void moveToTable(List<TableGuest> toTable, List<TableGuest> move) {
     List<TableGuest> missing = new ArrayList<>();
     for (TableGuest g : move) {
@@ -126,12 +164,15 @@ public class TableCr implements Chromosome {
         missing.add(g);
       }
     }
-    List<TableGuest> remove = removeRandom(toTable, missing.size(), missing);
+    List<TableGuest> remove = grabRandom(toTable, missing.size(), missing);
     for (int i = 0; i < remove.size(); i++) {
       swap(missing.get(i), remove.get(i));
     }
   }
 
+  /**
+   * Swap the seating of two guests.
+   */
   private void swap(TableGuest a, TableGuest b) {
     List<TableGuest> t1 = findTable(a);
     List<TableGuest> t2 = findTable(b);
@@ -141,6 +182,9 @@ public class TableCr implements Chromosome {
     t2.add(a);
   }
 
+  /**
+   * Find the table a guest is seated at.
+   */
   private List<TableGuest> findTable(TableGuest a) {
     for (List<TableGuest> table : tables) {
       if (table.contains(a)) return table;
@@ -148,7 +192,15 @@ public class TableCr implements Chromosome {
     return null;
   }
 
-  private List<TableGuest> removeRandom(List<TableGuest> table, int size, List<TableGuest> excluded) {
+  /**
+   * Grab random set of guests from a table.
+   *
+   * @param table the table to grab from
+   * @param size the number of guests to grab
+   * @param excluded list of guests to avoid picking
+   * @return a random selection of guests from the table
+   */
+  private List<TableGuest> grabRandom(List<TableGuest> table, int size, List<TableGuest> excluded) {
     List<TableGuest> remove = new ArrayList<>();
     for (int i = 0; i < size; i++) {
       TableGuest g;
@@ -159,6 +211,10 @@ public class TableCr implements Chromosome {
     return remove;
   }
 
+  /**
+   * Check if all the guests are present.
+   * @return true if all guests are present
+   */
   private boolean totalPresent() {
     for (List<TableGuest> t : tables) {
       for (TableGuest g : t) {
